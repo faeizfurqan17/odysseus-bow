@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>The Bow of Odysseus</title>
+<!-- Inline so the page makes no external requests and logs no favicon 404. -->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M9 3C19 8 19 24 9 29' fill='none' stroke='%23c98f4a' stroke-width='2.5'/%3E%3Cpath d='M9 3L9 29' stroke='%23d8cfc0' stroke-width='1.2'/%3E%3Cpath d='M9 16L26 16' stroke='%23d8cfc0' stroke-width='1.6'/%3E%3C/svg%3E" />
+<style>
+  :root {
+    --ink: #d8cfc0;
+    --ink-dim: #7d7466;
+    --warm: #c98f4a;
+    --bronze: #9a7238;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 100%; height: 100%; overflow: hidden; background: #05060a; }
+  body {
+    font-family: "Optima", "Palatino Linotype", Palatino, Georgia, serif;
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+    cursor: default;
+    touch-action: none;
+  }
+  canvas { display: block; width: 100%; height: 100%; }
+
+  /* ---- letterbox: locks the 2.39:1 IMAX-ish frame ---- */
+  .bar {
+    position: fixed; left: 0; right: 0; height: 5vh;
+    background: #000; z-index: 30; pointer-events: none;
+    transition: height 1.2s cubic-bezier(.16,1,.3,1);
+  }
+  .bar.top { top: 0; }
+  .bar.bottom { bottom: 0; }
+  body.wide .bar { height: 8vh; }
+
+  #ui {
+    position: fixed; inset: 0; z-index: 20;
+    pointer-events: none;
+    display: flex; flex-direction: column; justify-content: flex-end;
+    align-items: center;
+    padding: 0 0 9vh;
+  }
+
+  /* ---- prompt line ---- */
+  #prompt {
+    font-size: clamp(13px, 1.5vw, 19px);
+    letter-spacing: .34em;
+    text-transform: uppercase;
+    color: var(--ink);
+    text-shadow: 0 2px 18px rgba(0,0,0,.95), 0 0 44px rgba(0,0,0,.7);
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity .7s ease, transform .7s ease;
+    text-align: center;
+    padding: 0 6vw;
+  }
+  #prompt.show { opacity: .92; transform: translateY(0); }
+  #prompt .key {
+    color: var(--warm);
+    border: 1px solid rgba(201,143,74,.45);
+    padding: .1em .5em .16em;
+    margin: 0 .18em;
+    border-radius: 2px;
+    letter-spacing: .2em;
+  }
+
+  #sub {
+    margin-top: 1.1em;
+    font-size: clamp(10px, 1vw, 12px);
+    letter-spacing: .3em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    opacity: 0;
+    transition: opacity .7s ease;
+    text-align: center;
+  }
+  #sub.show { opacity: .8; }
+
+  /* ---- meter ---- */
+  #meter {
+    width: min(46vw, 430px);
+    margin-bottom: 2.4em;
+    opacity: 0;
+    transition: opacity .5s ease;
+  }
+  #meter.show { opacity: 1; }
+  #meter .track {
+    position: relative;
+    height: 2px;
+    background: rgba(216,207,192,.13);
+    overflow: visible;
+  }
+  #meter .fill {
+    position: absolute; left: 0; top: 0; bottom: 0;
+    width: 0%;
+    background: linear-gradient(90deg, rgba(154,114,56,.5), var(--warm));
+    box-shadow: 0 0 16px rgba(201,143,74,.6);
+  }
+  /* the target band the player must hold the rhythm inside */
+  #meter .notch {
+    position: absolute; top: -5px; bottom: -5px; width: 1px;
+    background: rgba(216,207,192,.4);
+  }
+  #meter .label {
+    display: flex; justify-content: space-between;
+    margin-top: .85em;
+    font-size: 9.5px; letter-spacing: .32em; text-transform: uppercase;
+    color: var(--ink-dim);
+  }
+  #meter .label .val { color: var(--warm); }
+
+  /* ---- rhythm pips: visualise tap cadence ---- */
+  #pips { display: flex; gap: 5px; justify-content: center; margin-bottom: 1.5em;
+          opacity: 0; transition: opacity .5s ease; }
+  #pips.show { opacity: 1; }
+  #pips i {
+    width: 3px; height: 3px; border-radius: 50%;
+    background: rgba(216,207,192,.2);
+    transition: background .18s ease, transform .18s ease;
+  }
+  #pips i.hot { background: var(--warm); transform: scale(2.1); }
+
+  /* ---- title card ----------------------------------------------------
+     The live scene keeps rendering behind this; the card is a frosted scrim
+     over it rather than an opaque plate, so the hall is just barely readable
+     through the blur. Everything warm on this screen is motivated by the
+     hearth glow anchored at the bottom edge.
+     -------------------------------------------------------------------- */
+  #title {
+    position: fixed; inset: 0; z-index: 40;
+    background: rgba(6,7,11,.88);
+    backdrop-filter: blur(22px) saturate(.5) brightness(.55);
+    -webkit-backdrop-filter: blur(22px) saturate(.5) brightness(.55);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 2.2em;
+    overflow: hidden;
+    transition: opacity 1.6s ease, backdrop-filter 1.6s ease;
+  }
+  #title.gone { opacity: 0; pointer-events: none; backdrop-filter: blur(0px); }
+
+  /* hearth glow spilling up from below the frame */
+  #hearth {
+    position: absolute; left: -10%; right: -10%; bottom: -18%;
+    height: 78%;
+    pointer-events: none;
+    background:
+      radial-gradient(ellipse 52% 100% at 50% 100%, rgba(226,132,46,.40), transparent 68%),
+      radial-gradient(ellipse 78% 74% at 50% 104%, rgba(168,64,18,.30), transparent 72%),
+      radial-gradient(ellipse 120% 52% at 50% 108%, rgba(90,28,8,.34), transparent 78%);
+    filter: blur(14px);
+    will-change: opacity, transform;
+  }
+  /* cool counter-light from the roof opening, so it isn't uniformly warm */
+  #title::before {
+    content: ''; position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(ellipse 44% 46% at 50% -12%, rgba(96,124,168,.16), transparent 70%);
+  }
+  /* film grain, generated inline so nothing is fetched */
+  #title::after {
+    content: ''; position: absolute; inset: 0; pointer-events: none;
+    opacity: .055; mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* embers, drifting up out of the hearth */
+  #embers { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+  #embers i {
+    position: absolute; bottom: -3vh;
+    border-radius: 50%;
+    background: radial-gradient(circle at 40% 35%, #ffd79a, #d9701f 55%, #7c2f08);
+    opacity: 0;
+    animation-name: emberRise;
+    animation-timing-function: cubic-bezier(.3,.05,.6,.9);
+    animation-iteration-count: infinite;
+    will-change: transform, opacity;
+  }
+  @keyframes emberRise {
+    0%   { transform: translate3d(0,0,0) scale(1);            opacity: 0; }
+    8%   {                                                     opacity: var(--peak); }
+    72%  {                                                     opacity: calc(var(--peak) * .55); }
+    100% { transform: translate3d(var(--dx), -104vh, 0) scale(.25); opacity: 0; }
+  }
+
+  #title .inner {
+    position: relative; z-index: 2;
+    display: flex; flex-direction: column;
+    align-items: center; gap: 2.2em;
+    max-width: min(94vw, 1000px);
+    text-align: center;
+  }
+
+  #title h1 {
+    font-size: clamp(19px, 3.3vw, 46px);
+    font-weight: 400;
+    letter-spacing: .30em;
+    text-indent: .30em;
+    text-transform: uppercase;
+    color: var(--ink);
+    text-align: center;
+    max-width: 94vw;
+    text-shadow: 0 0 34px rgba(201,143,74,.30), 0 2px 30px rgba(0,0,0,.9);
+  }
+  /* Words hold together; letters inside them animate individually. Without the
+     word wrapper the inline-blocks break mid-word on a narrow frame. */
+  #title h1 .w { display: inline-block; white-space: nowrap; }
+  #title h1 .l {
+    display: inline-block;
+    opacity: 0;
+    transform: translateY(12px) scale(.97);
+    animation: letterIn .55s cubic-bezier(.16,1,.3,1) forwards;
+  }
+  /* Deliberately no blur filter here: a filter on each span promotes it to its
+     own compositing layer, which over a backdrop-filter parent renders as a
+     visible rectangle behind every letter. */
+  @keyframes letterIn {
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  #title .rule {
+    width: min(30vw, 260px); height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(201,143,74,.75), transparent);
+    transform: scaleX(0); transform-origin: 50% 50%;
+    animation: ruleIn .9s cubic-bezier(.16,1,.3,1) .42s forwards;
+  }
+  @keyframes ruleIn { to { transform: scaleX(1); } }
+
+  #title p {
+    max-width: 34em; text-align: center; line-height: 2;
+    font-size: clamp(11px, 1.15vw, 14px);
+    letter-spacing: .16em;
+    color: var(--ink-dim);
+    padding: 0 8vw;
+    opacity: 0;
+    animation: fadeUp .8s cubic-bezier(.16,1,.3,1) .56s forwards;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  #begin {
+    pointer-events: auto;
+    margin-top: 1em;
+    background: none; border: 1px solid rgba(201,143,74,.4);
+    color: var(--warm); font: inherit;
+    font-size: clamp(10px, 1vw, 13px);
+    letter-spacing: .36em; text-transform: uppercase; text-indent: .36em;
+    padding: 1.05em 2.4em; cursor: pointer;
+    opacity: 0;
+    animation: fadeUp .8s cubic-bezier(.16,1,.3,1) .78s forwards;
+    transition: background .4s ease, border-color .4s ease, color .4s ease, box-shadow .4s ease;
+  }
+  #begin:hover {
+    background: rgba(201,143,74,.12); border-color: rgba(201,143,74,.85); color: var(--ink);
+    box-shadow: 0 0 30px rgba(201,143,74,.22), inset 0 0 20px rgba(201,143,74,.07);
+  }
+
+
+  /* ---- piano tiles, top left -----------------------------------------
+     Three keys that depress when A / S / D are struck — by hand, or by the
+     draw crossing a mark. Rotated about their top edge rather than simply
+     nudged down, which is how a real key pivots on its balance rail.
+     -------------------------------------------------------------------- */
+  #keys {
+    position: fixed; top: calc(5vh + 18px); left: 22px; z-index: 36;
+    display: none; gap: 7px;
+    perspective: 520px;
+    pointer-events: none;
+  }
+  #keys.show { display: flex; }
+  #keys .key {
+    pointer-events: auto;
+    width: 46px; height: 122px;
+    border: 0; padding: 0 0 11px;
+    font: inherit;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: flex-end; gap: 3px;
+    background: linear-gradient(180deg, #efe8da 0%, #ded5c3 78%, #b6ac99 100%);
+    border-radius: 2px 2px 6px 6px;
+    box-shadow:
+      0 7px 0 -1px #55503f,
+      0 12px 20px rgba(0,0,0,.55),
+      inset 0 1px 0 rgba(255,255,255,.85);
+    transform-origin: 50% 0%;
+    transition: transform .08s ease-out, box-shadow .08s ease-out,
+                background .14s ease-out, color .14s ease-out;
+    cursor: pointer;
+  }
+  #keys .key .ltr {
+    font-size: 12px; letter-spacing: .2em; text-indent: .2em;
+    color: #6f6754;
+  }
+  #keys .key .nte {
+    font-size: 9px; letter-spacing: .22em; text-indent: .22em;
+    color: #a2977f;
+  }
+  #keys .key.down {
+    transform: rotateX(11deg) translateY(3px);
+    background: linear-gradient(180deg, #f7dcb2 0%, #e6b877 76%, #bd8944 100%);
+    box-shadow:
+      0 2px 0 -1px #55503f,
+      0 4px 10px rgba(0,0,0,.5),
+      inset 0 1px 0 rgba(255,255,255,.6),
+      0 0 26px rgba(201,143,74,.5);
+  }
+  #keys .key.down .ltr { color: #4a3a1e; }
+  #keys .key.down .nte { color: #6d5426; }
+
+  /* ---- perf readout ---- */
+  #stats {
+    position: fixed; top: calc(5vh + 156px); left: 24px; z-index: 35;
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 10px; letter-spacing: .08em; line-height: 1.7;
+    color: rgba(216,207,192,.42); white-space: pre; display: none;
+  }
+  #stats.show { display: block; }
+
+  /* full-frame flash used on the release beat */
+  #flash {
+    position: fixed; inset: 0; z-index: 25; pointer-events: none;
+    background: #fff; opacity: 0; mix-blend-mode: screen;
+  }
+
+  /* ---- persistent controls, bottom right ---- */
+  #controls {
+    position: fixed; right: 22px; bottom: calc(5vh + 16px); z-index: 36;
+    display: flex; flex-direction: column; align-items: flex-end; gap: 9px;
+    transition: bottom 1.2s cubic-bezier(.16,1,.3,1);
+    pointer-events: none;   /* only the buttons themselves should catch clicks */
+  }
+  body.wide #controls { bottom: calc(8vh + 16px); }
+  #controls button {
+    pointer-events: auto;
+    background: rgba(8,9,13,.72); border: 1px solid rgba(216,207,192,.16);
+    color: rgba(216,207,192,.62); font: inherit;
+    font-size: 10px; letter-spacing: .26em; text-transform: uppercase;
+    text-indent: .26em;
+    padding: .72em 1.15em; cursor: pointer; border-radius: 2px;
+    transition: color .3s ease, border-color .3s ease, background .3s ease;
+  }
+  #controls button:hover {
+    color: var(--warm); border-color: rgba(201,143,74,.5);
+    background: rgba(201,143,74,.09);
+  }
+  #controls button b { color: var(--warm); font-weight: 400; margin-right: .7em; }
+</style>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.185.1/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.185.1/examples/jsm/"
+  }
+}
+</script>
+</head>
+<body>
+  <canvas id="scene"></canvas>
+
+  <div class="bar top"></div>
+  <div class="bar bottom"></div>
+  <div id="flash"></div>
+
+  <div id="ui">
+    <div id="pips"></div>
+    <div id="meter">
+      <div class="track"><div class="fill"></div></div>
+      <div class="label"><span id="meterName">Tension</span><span class="val" id="meterVal">0%</span></div>
+    </div>
+    <div id="prompt"></div>
+    <div id="sub"></div>
+  </div>
+
+  <div id="keys"></div>
+
+  <div id="controls">
+    <button id="btnNotes"><b>A S D</b>Notes  C F A</button>
+    <button id="btnPluck"><b>P</b>Pluck String</button>
+    <button id="btnMute"><b>M</b>Mute</button>
+    <button id="btnRestart"><b>R</b>Restart</button>
+    <button id="btnStats"><b>`</b>Stats</button>
+  </div>
+
+  <div id="stats"></div>
+
+  <div id="title">
+    <div id="hearth"></div>
+    <div id="embers"></div>
+    <div class="inner">
+      <h1 data-text="The Bow of Odysseus">The Bow of Odysseus</h1>
+      <div class="rule"></div>
+      <p>No suitor could string it. Twelve axe heads stand in a line down the length of the hall,
+         and the shot must pass clean through every socket.</p>
+      <button id="begin">Enter the Hall</button>
+    </div>
+  </div>
+
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>

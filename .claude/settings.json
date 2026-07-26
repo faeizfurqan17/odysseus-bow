@@ -1,0 +1,43 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//Users/faeizfurqan/.claude/**)",
+      "Bash(npm ls *)",
+      "Bash(npm config *)",
+      "Read(//Users/faeizfurqan/.local/share/claude/versions/**)",
+      "Read(//Users/faeizfurqan/**)",
+      "Bash(nslookup downloads.claude.ai)",
+      "Bash(curl -sS -o /dev/null -w \"HTTP %{http_code}  \\(dns:%{time_namelookup}s connect:%{time_connect}s\\)\\\\n\" https://downloads.claude.ai/claude-code-releases/latest)",
+      "Bash(scutil --nc list)",
+      "Bash(scutil --dns)",
+      "Bash(dscacheutil -q host -a name downloads.claude.ai)",
+      "Bash(dig +short downloads.claude.ai @192.168.1.1)",
+      "Bash(dscacheutil -q host -a name google.com)",
+      "Bash(dscacheutil -q host -a name github.com)",
+      "Bash(sudo dscacheutil -flushcache)",
+      "Bash(sudo killall -HUP mDNSResponder)",
+      "Bash(curl -sS -o /dev/null -w \"HTTP %{http_code} dns:%{time_namelookup}s\\\\n\" https://downloads.claude.ai/claude-code-releases/latest)",
+      "Bash(curl -s https://unpkg.com/three@0.185.1/examples/jsm/postprocessing/BokehPass.js)",
+      "Bash(curl -s https://unpkg.com/three@0.185.1/examples/jsm/postprocessing/AfterimagePass.js)",
+      "Bash(curl -s https://unpkg.com/three@0.185.1/examples/jsm/shaders/AfterimageShader.js)",
+      "Bash(python3 -m http.server 8412)",
+      "Bash(curl -s -o /dev/null -w \"index: %{http_code}\\\\n\" http://localhost:8412/index.html)",
+      "Bash(curl -s -o /dev/null -w \"main.js: %{http_code}\\\\n\" http://localhost:8412/src/main.js)",
+      "Bash(mkdir -p /private/tmp/claude-502/-Users-faeizfurqan-Desktop-SideProjects-odysseus-bow/47faa299-2a12-4806-85ea-152b2c690528/scratchpad/harness)",
+      "Bash(npm init *)",
+      "Bash(npm i *)",
+      "WebFetch(domain:parade.com)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" -I \"https://cdn.freesound.org/previews/0/1_1-hq.mp3\")",
+      "Bash(curl -s -m 20 \"https://freesound.org/apiv2/search/text/?query=gong&token=INVALID\")",
+      "Bash(export FS_KEY='fx0JXUWpDXqOAvS983obgLj00bACSBwVt0l9fDRO')",
+      "Bash(curl -s -G https://freesound.org/apiv2/search/text/ --data-urlencode 'query=bronze gong hit' --data-urlencode 'filter=license:\"Creative Commons 0\" duration:[0.5 TO 12]' --data-urlencode fields=id,name,username,license,duration,previews --data-urlencode page_size=5 --data-urlencode token=__TRACKED_VAR__)",
+      "Bash(python3 -m json.tool)",
+      "Bash(curl -s -G https://freesound.org/apiv2/search/text/ --data-urlencode query=gong --data-urlencode page_size=3 --data-urlencode fields=id,name,license --data-urlencode token=fx0JXUWpDXqOAvS983obgLj00bACSBwVt0l9fDRO)",
+      "Bash(ffmpeg -v error -i assets/audio/bowshot-seq.mp3 -ac 1 -ar 22050 -f f32le -)",
+      "Bash(OUT=/private/tmp/claude-502/-Users-faeizfurqan-Desktop-SideProjects-odysseus-bow/47faa299-2a12-4806-85ea-152b2c690528/scratchpad/shot node run.mjs)"
+    ],
+    "additionalDirectories": [
+      "/Users/faeizfurqan"
+    ]
+  }
+}

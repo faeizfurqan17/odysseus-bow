@@ -1,0 +1,54 @@
+{
+  "gong": [
+    "gong-1.mp3",
+    "gong-2.mp3",
+    "gong-3.mp3",
+    "gong-4.mp3",
+    "gong-5.mp3"
+  ],
+  "creak": [
+    "creak-1.mp3",
+    "creak-2.mp3",
+    "creak-3.mp3",
+    "creak-4.mp3"
+  ],
+  "bowdraw": [
+    "bowdraw-1.mp3",
+    "bowdraw-2.mp3"
+  ],
+  "release": [
+    "release-1.mp3",
+    "release-2.mp3",
+    "release-3.mp3"
+  ],
+  "whoosh": [
+    "whoosh-1.mp3",
+    "whoosh-2.mp3",
+    "whoosh-3.mp3"
+  ],
+  "impact": [
+    "impact-1.mp3",
+    "impact-2.mp3",
+    "impact-3.mp3",
+    "impact-4.mp3"
+  ],
+  "metal": [
+    "metal-1.mp3",
+    "metal-2.mp3",
+    "metal-3.mp3"
+  ],
+  "bowshot": [
+    "bowshot-release.mp3"
+  ],
+  "pluck": [
+    "pluck-1.mp3"
+  ],
+  "fire": [
+    "fire-loop.mp3"
+  ],
+  "note": [
+    "piano-f.mp3",
+    "piano-a.mp3",
+    "piano-c.mp3"
+  ]
+}
