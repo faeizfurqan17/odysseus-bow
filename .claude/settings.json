@@ -34,7 +34,10 @@
       "Bash(python3 -m json.tool)",
       "Bash(curl -s -G https://freesound.org/apiv2/search/text/ --data-urlencode query=gong --data-urlencode page_size=3 --data-urlencode fields=id,name,license --data-urlencode token=fx0JXUWpDXqOAvS983obgLj00bACSBwVt0l9fDRO)",
       "Bash(ffmpeg -v error -i assets/audio/bowshot-seq.mp3 -ac 1 -ar 22050 -f f32le -)",
-      "Bash(OUT=/private/tmp/claude-502/-Users-faeizfurqan-Desktop-SideProjects-odysseus-bow/47faa299-2a12-4806-85ea-152b2c690528/scratchpad/shot node run.mjs)"
+      "Bash(OUT=/private/tmp/claude-502/-Users-faeizfurqan-Desktop-SideProjects-odysseus-bow/47faa299-2a12-4806-85ea-152b2c690528/scratchpad/shot node run.mjs)",
+      "Bash(npx vercel *)",
+      "Bash(git fetch *)",
+      "Bash(git add *)"
     ],
     "additionalDirectories": [
       "/Users/faeizfurqan"
