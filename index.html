@@ -121,6 +121,39 @@
   }
   #pips i.hot { background: var(--warm); transform: scale(2.1); }
 
+  /* ---- brace button: the touch stand-in for tapping spacebar --------
+     Hidden by default. There's no reliable keyboard on a touch device, so this
+     is what actually strings the bow there — each tap feeds the same rhythm
+     tracker a real spacebar press would, not a shortcut around the mechanic.
+     Shown only on coarse-pointer (touch) devices and only during stringing. */
+  #brace {
+    display: none;
+    pointer-events: auto;
+    margin-top: 1.6em;
+    width: 108px; height: 108px;
+    border-radius: 50%;
+    border: 1px solid rgba(201,143,74,.55);
+    background: radial-gradient(circle at 50% 38%, rgba(201,143,74,.16), rgba(8,9,13,.72) 72%);
+    color: var(--warm);
+    font: inherit;
+    font-size: 11px; letter-spacing: .22em; text-indent: .22em;
+    text-transform: uppercase;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none; touch-action: manipulation;
+    transition: transform .08s ease-out, background .12s ease-out, box-shadow .12s ease-out;
+    box-shadow: 0 0 0 rgba(201,143,74,0);
+  }
+  #brace.show { display: block; }
+  #brace.hit {
+    transform: scale(.9);
+    background: radial-gradient(circle at 50% 38%, rgba(201,143,74,.34), rgba(8,9,13,.72) 72%);
+    box-shadow: 0 0 28px rgba(201,143,74,.35);
+  }
+  @media (pointer: coarse) {
+    /* On touch, the meter sits a little higher to make room underneath it. */
+    #ui { padding-bottom: 5vh; }
+  }
+
   /* ---- title card ----------------------------------------------------
      The live scene keeps rendering behind this; the card is a frosted scrim
      over it rather than an opaque plate, so the hall is just barely readable
@@ -369,6 +402,7 @@
     </div>
     <div id="prompt"></div>
     <div id="sub"></div>
+    <button id="brace" type="button">Brace<br>the Bow</button>
   </div>
 
   <div id="keys"></div>

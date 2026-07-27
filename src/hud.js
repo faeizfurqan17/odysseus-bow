@@ -32,6 +32,7 @@ export function createHUD() {
     embers: document.getElementById('embers'),
     heading: document.querySelector('#title h1'),
     keys: document.getElementById('keys'),
+    brace: document.getElementById('brace'),
   };
 
   // The controls only make sense once the title card is out of the way.
@@ -137,6 +138,7 @@ export function createHUD() {
   let currentPrompt = '';
   let flashAmount = 0;
   let wideState = false;
+  let braceTimer = 0;
 
   return {
     el,
@@ -174,6 +176,21 @@ export function createHUD() {
 
     showPips(visible) {
       el.pips.classList.toggle('show', visible);
+    },
+
+    /**
+     * Show the brace button. Gated on coarse-pointer (touch) at the call site,
+     * not here — this just obeys whatever the caller decides.
+     */
+    showBrace(visible) {
+      el.brace.classList.toggle('show', visible);
+    },
+
+    /** Brief press feedback, independent of whatever fired the tap. */
+    pulseBrace() {
+      el.brace.classList.add('hit');
+      clearTimeout(braceTimer);
+      braceTimer = setTimeout(() => el.brace.classList.remove('hit'), 90);
     },
 
     /**

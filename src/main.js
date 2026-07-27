@@ -103,6 +103,27 @@ const audio = createAudio();
 const hud = createHUD();
 
 const taps = createTapTracker();
+
+/* ------------------------------------------------------------------ *
+ * Brace button — the touch stand-in for tapping spacebar.
+ *
+ * There's no reliable keyboard on a touch device, so the on-screen button is
+ * how the bow actually gets strung there. Every press feeds the same
+ * registerTap() the spacebar handler calls, so it drives the real rhythm
+ * mechanic rather than shortcutting around it — the cadence still has to be
+ * sustained, mashing still doesn't help.
+ * ------------------------------------------------------------------ */
+const isTouch = window.matchMedia?.('(pointer: coarse)').matches ?? false;
+
+function onBracePress(e) {
+  e.preventDefault();
+  taps.registerTap();
+  hud.pulseBrace();
+}
+hud.el.brace.addEventListener('pointerdown', onBracePress);
+// Some touch browsers still fire a synthetic click after pointerdown; without
+// this it can double-count as a second, near-simultaneous tap.
+hud.el.brace.addEventListener('click', (e) => e.preventDefault());
 // Grabbing the string plucks it; dragging anywhere else draws the bow.
 const zoom = createZoomGesture(canvas, {
   allowDrag: (e) => !canGrabString(e.clientX, e.clientY),
@@ -579,6 +600,7 @@ function frame() {
         bow.nockArrow();
         post.setFocus(TUNE.camNear.radius, 0.00021);
         hud.showPips(false);
+        hud.showBrace(false);
         setState(State.STRUNG);
       }
       break;
@@ -692,6 +714,7 @@ function reset() {
   taps.reset();
   zoom.reset();
   hud.showPips(true);
+  hud.showBrace(isTouch);
   hud.setMeter('Tension', 0, true);
   setState(State.STRINGING);
 }
@@ -705,6 +728,7 @@ function begin() {
   hud.hideTitle();
   hud.showKeys(true);
   hud.showPips(true);
+  hud.showBrace(isTouch);
   hud.setMeter('Tension', 0, true);
   setState(State.STRINGING);
 }

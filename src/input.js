@@ -16,13 +16,13 @@ export function createTapTracker({ window: win = window, historySize = 8 } = {})
   let rate = 0;
   const listeners = [];
 
-  function onKeyDown(e) {
-    if (e.code !== 'Space') return;
-    // Holding the key down auto-repeats. Without this you could just lean on the
-    // spacebar and the OS would play the game for you.
-    if (e.repeat) return;
-    e.preventDefault();
-
+  /**
+   * Record one tap, from whatever source. The spacebar handler below and the
+   * on-screen brace button (for touch, which has no spacebar) both funnel
+   * through here, so the rhythm read — and the rest of the game — can't tell
+   * which one produced a given tap.
+   */
+  function registerTap() {
     const now = performance.now();
     if (lastTap > 0) {
       const dt = now - lastTap;
@@ -38,9 +38,19 @@ export function createTapTracker({ window: win = window, historySize = 8 } = {})
     for (const fn of listeners) fn(now);
   }
 
+  function onKeyDown(e) {
+    if (e.code !== 'Space') return;
+    // Holding the key down auto-repeats. Without this you could just lean on the
+    // spacebar and the OS would play the game for you.
+    if (e.repeat) return;
+    e.preventDefault();
+    registerTap();
+  }
+
   win.addEventListener('keydown', onKeyDown, { passive: false });
 
   return {
+    registerTap,
     /** Taps/sec, from the median gap — one hesitation shouldn't tank the read. */
     get rate() { return rate; },
     get msSinceTap() { return lastTap ? performance.now() - lastTap : Infinity; },
